@@ -15,11 +15,9 @@ namespace NWN.Events
         public NWCreature Creature => Internal.OBJECT_SELF.AsCreature();
         public NWItem Item => GetEventObject("ITEM_OBJECT_ID").AsItem();
         public NWObject TargetObject => GetEventObject("TARGET_OBJECT_ID").AsObject();
-        public int ItemPropertyIndex => int.Parse(NWNX.Events.GetEventData("ITEM_PROPERTY_INDEX"));
-        public int ItemSubPropertyIndex => int.Parse(NWNX.Events.GetEventData("ITEM_SUB_PROPERTY_INDEX"));
-        public float TargetX => float.Parse(NWNX.Events.GetEventData("TARGET_POSITION_X"));
-        public float TargetY => float.Parse(NWNX.Events.GetEventData("TARGET_POSITION_Y"));
-        public float TargetZ => float.Parse(NWNX.Events.GetEventData("TARGET_POSITION_Z"));
+        public int ItemPropertyIndex => GetEventInt("ITEM_PROPERTY_INDEX");
+        public int ItemSubPropertyIndex => GetEventInt("ITEM_SUB_PROPERTY_INDEX");
+        public Vector TargetVector => GetEventVector("TARGET_POSITION");
 
         public UseItemEvent(string script) { EventType = script; }
 

@@ -12,7 +12,7 @@ namespace NWN.Events
 
         public NWPlayer Player => Internal.OBJECT_SELF.AsPlayer();
         public NWObject ExaminedObject => GetEventObject("EXAMINEE_OBJECT_ID").AsObject();
-        public bool GetTrapSuccess() => NWNX.Events.GetEventData("TRAP_EXAMINE_SUCCESS") == "1";
+        public bool GetTrapSuccess() => GetEventInt("TRAP_EXAMINE_SUCCESS") == 1;
 
         public ExamineEvent(string script) { EventType = script; }
 

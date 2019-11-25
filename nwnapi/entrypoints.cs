@@ -64,11 +64,6 @@ namespace NWN
 
             var prefix = "NWNX_ON_";
             var suffix = script.Substring(script.LastIndexOf('_') + 1);
-            if (suffix != "BEFORE" && suffix != "AFTER")
-            {
-                Console.WriteLine($"Strange NWNX event: {script}");
-                return "";
-            }
             var name = script.Substring(prefix.Length, script.Length-suffix.Length-prefix.Length);
             if (name.Length > MAX_CHARS_IN_SCRIPT_NAME - 5)
                 name = name.Substring(0, MAX_CHARS_IN_SCRIPT_NAME-10) + $"-{numFakeNames++}";
