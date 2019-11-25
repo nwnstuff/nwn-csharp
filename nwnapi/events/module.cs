@@ -86,8 +86,8 @@ namespace NWN.Events
     {
         private static bool isConfigured = false;
 
-        [ScriptHandler("on_module_load")]
-        public static void OnModuleLoad(uint oModule)
+        [NWNEventHandler("on_module_load")]
+        public static void OnModuleLoad(string script)
         {
             if (isConfigured) 
             {
@@ -96,6 +96,7 @@ namespace NWN.Events
             }
 
             Console.WriteLine("Module loaded. Configuring events.");
+            NWNEventHandler.SubscribeToNWNXEvents();
             var module = NWModule.Module;
             module.Scripts[EventScript.Module_OnClientEnter]            = "mod-client-enter";
             module.Scripts[EventScript.Module_OnClientExit]             = "mod-client-exit";
@@ -123,116 +124,103 @@ namespace NWN.Events
                 area.Scripts[EventScript.Area_OnUserDefined] = "";
             }
 
-            NWNX.Events.SubscribeEvent("NWNX_ON_EXAMINE_OBJECT_BEFORE", "nxe-examine-before");
-
             isConfigured = true;
             BuiltinEvents.OnModuleLoad();
         }
 
-        [ScriptHandler("mod-heartbeat")]
-        public static void OnModuleHeartBeat(uint oModule) { 
+        [NWNEventHandler("mod-heartbeat")]
+        public static void OnModuleHeartBeat(string script) { 
             BuiltinEvents.OnModuleHeartbeat(); 
         }
 
-        [ScriptHandler("mod-start")]
-        public static void OnModuleStart(uint oModule) { 
+        [NWNEventHandler("mod-start")]
+        public static void OnModuleStart(string script) { 
             BuiltinEvents.OnModuleStart(); 
         }
 
-        [ScriptHandler("mod-client-enter")]
-        public static void OnClientEnter(uint oModule) { 
+        [NWNEventHandler("mod-client-enter")]
+        public static void OnClientEnter(string script) { 
             BuiltinEvents.OnClientEnter(); 
         }
 
-        [ScriptHandler("mod-client-exit")]
-        public static void OnClientLeave(uint oModule) { 
+        [NWNEventHandler("mod-client-exit")]
+        public static void OnClientLeave(string script) { 
             BuiltinEvents.OnClientLeave(); 
         }
 
-        [ScriptHandler("default")]
-        public static void OnDefault(uint oid) { 
-            BuiltinEvents.OnPlayerHeartbeat(oid.AsPlayer()); 
+        [NWNEventHandler("default")]
+        public static void OnDefault(string script) { 
+            BuiltinEvents.OnPlayerHeartbeat(Internal.OBJECT_SELF.AsPlayer()); 
         }
 
-        [ScriptHandler("mod-cutscene")]
-        public static void OnCancelCutscene(uint oid) { 
+        [NWNEventHandler("mod-cutscene")]
+        public static void OnCancelCutscene(string script) { 
             BuiltinEvents.OnCancelCutscene(NWScript.GetLastPCToCancelCutscene().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-death")]
-        public static void OnPlayerDeath(uint oid) { 
+        [NWNEventHandler("mod-pc-death")]
+        public static void OnPlayerDeath(string script) { 
             BuiltinEvents.OnPlayerDeath(NWScript.GetLastPlayerDied().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-dying")]
-        public static void OnPlayerDying(uint oid) { 
+        [NWNEventHandler("mod-pc-dying")]
+        public static void OnPlayerDying(string script) { 
             BuiltinEvents.OnPlayerDying(NWScript.GetLastPlayerDying().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-levelup")]
-        public static void OnPlayerLevelUp(uint oid) { 
+        [NWNEventHandler("mod-pc-levelup")]
+        public static void OnPlayerLevelUp(string script) { 
             BuiltinEvents.OnPlayerLevelUp(NWScript.GetPCLevellingUp().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-rest")]
-        public static void OnPlayerRest(uint oid) { 
+        [NWNEventHandler("mod-pc-rest")]
+        public static void OnPlayerRest(string script) { 
             BuiltinEvents.OnPlayerRest(NWScript.GetLastPCRested().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-respawn")]
-        public static void OnPlayerRespawn(uint oid) { 
+        [NWNEventHandler("mod-pc-respawn")]
+        public static void OnPlayerRespawn(string script) { 
             BuiltinEvents.OnPlayerRespawn(NWScript.GetLastRespawnButtonPresser().AsPlayer()); 
         }
 
-        [ScriptHandler("mod-pc-chat")]
-        public static void OnPlayerChat(uint oid) { 
+        [NWNEventHandler("mod-pc-chat")]
+        public static void OnPlayerChat(string script) { 
             BuiltinEvents.OnPlayerChat(new PlayerChatEvent()); 
         }
 
-        [ScriptHandler("mod-acquire")]
-        public static void OnItemAcquired(uint oid) { 
+        [NWNEventHandler("mod-acquire")]
+        public static void OnItemAcquired(string script) { 
             BuiltinEvents.OnItemAcquired(NWScript.GetModuleItemAcquired().AsItem()); 
         }
 
-        [ScriptHandler("mod-itemlost")]
-        public static void OnItemLost(uint oid) { 
+        [NWNEventHandler("mod-itemlost")]
+        public static void OnItemLost(string script) { 
             BuiltinEvents.OnItemLost(NWScript.GetModuleItemLost().AsItem(), NWScript.GetModuleItemLostBy().AsCreature()); 
         }
 
-        [ScriptHandler("mod-activate")]
-        public static void OnItemActivated(uint oid) { 
+        [NWNEventHandler("mod-activate")]
+        public static void OnItemActivated(string script) { 
             BuiltinEvents.OnItemActivated(new ItemActivatedEvent()); 
         }
         
-        [ScriptHandler("mod-equip")]
-        public static void OnItemEquipped(uint oid) { 
+        [NWNEventHandler("mod-equip")]
+        public static void OnItemEquipped(string script) { 
             BuiltinEvents.OnItemEquipped(NWScript.GetPCItemLastEquipped().AsItem()); 
         }
 
-        [ScriptHandler("mod-unequip")]
-        public static void OnItemUnequipped(uint oid) { 
+        [NWNEventHandler("mod-unequip")]
+        public static void OnItemUnequipped(string script) { 
             BuiltinEvents.OnItemUnequipped(NWScript.GetPCItemLastUnequipped().AsItem()); 
         }
 
-        [ScriptHandler("area-enter")]
-        public static void OnAreaEnter(uint oid) { 
-            BuiltinEvents.OnAreaEnter(oid.AsArea()); 
+        [NWNEventHandler("area-enter")]
+        public static void OnAreaEnter(string script) { 
+            BuiltinEvents.OnAreaEnter(Internal.OBJECT_SELF.AsArea()); 
         }
 
-        [ScriptHandler("area-exit")]
-        public static void OnAreaExit(uint oid) { 
-            BuiltinEvents.OnAreaExit(oid.AsArea()); 
-        }
-
-
-        [ScriptHandler("nxe-examine-before")]
-        public static void BeforeExamineObject(uint oid)
-        {
-            var sExaminee = NWNX.Events.GetEventData("EXAMINEE_OBJECT_ID");
-            var oExaminee = NWNX.Object.StringToObject(sExaminee);
-            var subjectName = NWScript.GetName(oid); 
-            var objectName = NWScript.GetName(oExaminee);
-            Console.WriteLine($"{subjectName} examined {objectName}");
+        [NWNEventHandler("area-exit")]
+        public static void OnAreaExit(string script) { 
+            BuiltinEvents.OnAreaExit(Internal.OBJECT_SELF.AsArea()); 
         }
     }
 }

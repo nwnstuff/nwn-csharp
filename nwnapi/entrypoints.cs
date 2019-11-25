@@ -4,15 +4,20 @@ using System.Collections.Generic;
 
 namespace NWN
 {
-    public delegate void ScriptDelegate(uint oid);
-
-    public class Entrypoints
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple=true)]  
+    public class NWNEventHandler : System.Attribute 
     {
+        public delegate void ScriptDelegate(string script);
+        public static Dictionary<string, string> EventNamesShortLong = new Dictionary<string, string>();
+        public static Dictionary<string, ScriptDelegate> Scripts;
+        public const int MAX_CHARS_IN_SCRIPT_NAME = 16;
         public const int SCRIPT_HANDLED = 0;
         public const int SCRIPT_NOT_HANDLED = -1;
+        private static int numFakeNames = 0;
 
-        public static Dictionary<string, ScriptDelegate> Scripts;
-
+        public string Script;
+        public NWNEventHandler(string script) { Script = script; }
+        
         public static void OnMainLoop(ulong frame)
         {
             // Console.WriteLine($"MainLoop frame {frame}");
@@ -20,9 +25,10 @@ namespace NWN
 
         public static int OnRunScript(string script, uint oidSelf)
         {
-            if (Scripts.ContainsKey(script)) {
-                Console.WriteLine($"Handling '{script}' on oid {oidSelf}");
-                Scripts[script](oidSelf);
+            if (EventNamesShortLong.ContainsKey(script)) {
+                var longName = EventNamesShortLong[script];
+                Console.WriteLine($"Handling '{script}' ('{longName}') on oid {oidSelf}");
+                Scripts[longName](longName);
                 return SCRIPT_HANDLED;
             }
             Console.WriteLine($"Passing '{script}' on oid {oidSelf} to nwscript");
@@ -32,29 +38,71 @@ namespace NWN
         public static void OnStart()
         {
             Console.WriteLine("OnStart() called");
-            Scripts = ScriptHandler.GetHandlersFromAssembly();
+            Scripts = NWNEventHandler.GetHandlersFromAssembly();
+
+            Events.ExamineEvent.AfterExamineObject += e => Console.WriteLine($"{e.Player.Name} examined {e.ExaminedObject.Name}");
         }
-    }
 
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple=true)]  
-    public class ScriptHandler : System.Attribute {
-        public string Script;
+        public static void SubscribeToNWNXEvents()
+        {
+            foreach (var kv in EventNamesShortLong.Where(p=>p.Key.StartsWith("nx-")))
+            {
+                Console.WriteLine($"Registering {kv.Key} -> {kv.Value}");
+                NWNX.Events.SubscribeEvent(kv.Value, kv.Key);
+            }
+        }
 
-        public ScriptHandler(string script) { Script = script; }
-        
-        public static Dictionary<string, ScriptDelegate> GetHandlersFromAssembly() {
+        public static string GetShortName(string script)
+        {
+            // Console.WriteLine($"GetShortName({script})");
+            if (EventNamesShortLong.ContainsValue(script)) 
+                return EventNamesShortLong.Where(p=>p.Value==script).First().Key;
+            if (script.Length <= MAX_CHARS_IN_SCRIPT_NAME) 
+                return script;
+            if (!script.StartsWith("NWNX_ON_")) 
+                return script.Substring(0, MAX_CHARS_IN_SCRIPT_NAME);
+
+            var prefix = "NWNX_ON_";
+            var suffix = script.Substring(script.LastIndexOf('_') + 1);
+            if (suffix != "BEFORE" && suffix != "AFTER")
+            {
+                Console.WriteLine($"Strange NWNX event: {script}");
+                return "";
+            }
+            var name = script.Substring(prefix.Length, script.Length-suffix.Length-prefix.Length);
+            if (name.Length > MAX_CHARS_IN_SCRIPT_NAME - 5)
+                name = name.Substring(0, MAX_CHARS_IN_SCRIPT_NAME-10) + $"-{numFakeNames++}";
+            return $"nx-{name.Replace('_', '-')}-{suffix.Substring(0, 1)}".ToLower();
+        }
+
+        public static Dictionary<string, ScriptDelegate> GetHandlersFromAssembly() 
+        {
             var result = new Dictionary<string, ScriptDelegate>();
             var handlers = System.Reflection.Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttributes(typeof(ScriptHandler), false).Length > 0)
+                .Where(m => m.GetCustomAttributes(typeof(NWNEventHandler), false).Length > 0)
                 .ToArray();
+
             foreach (var mi in handlers)
             {
                 var del = (ScriptDelegate) mi.CreateDelegate(typeof(ScriptDelegate));
-                foreach (var attr in mi.GetCustomAttributes(typeof(ScriptHandler), false))
+                foreach (var attr in mi.GetCustomAttributes(typeof(NWNEventHandler), false))
                 {
-                    result[(attr as ScriptHandler).Script] = del;
+                    var script = (attr as NWNEventHandler).Script;
+                    var shortName = GetShortName(script);
+                    if (shortName.Length > MAX_CHARS_IN_SCRIPT_NAME || shortName.Length == 0)
+                    {
+                        Console.WriteLine($"Bad short name for {script}: {shortName}");
+                        throw new ApplicationException();
+                    }
+                    if (EventNamesShortLong.ContainsKey(shortName))
+                    {
+                        Console.WriteLine($"Attempting to register script twice: {script} ({shortName})");
+                        throw new ApplicationException();
+                    }
+                    EventNamesShortLong[shortName] = script;
+                    result[script] = del;
                 }
             }
             return result;

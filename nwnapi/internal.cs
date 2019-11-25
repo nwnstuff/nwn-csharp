@@ -12,7 +12,7 @@ namespace NWN
         {
             try
             {
-                NWN.Entrypoints.OnMainLoop(frame);
+                NWN.NWNEventHandler.OnMainLoop(frame);
             }
             catch (Exception e)
             {
@@ -33,7 +33,7 @@ namespace NWN
             ScriptContexts.Push(new ScriptContext { OwnerObject = oidSelf, ScriptName = script });
             try
             {
-                ret = NWN.Entrypoints.OnRunScript(script, oidSelf);
+                ret = NWN.NWNEventHandler.OnRunScript(script, oidSelf);
             }
             catch (Exception e)
             {

@@ -210,7 +210,7 @@ namespace NWN
 
             try
             {
-                NWN.Entrypoints.OnStart();
+                NWN.NWNEventHandler.OnStart();
             }
             catch (Exception e)
             {
