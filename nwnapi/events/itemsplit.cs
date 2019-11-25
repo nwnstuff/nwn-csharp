@@ -12,7 +12,7 @@ namespace NWN.Events
 
         public NWPlayer Player => Internal.OBJECT_SELF.AsPlayer();
         public NWItem Item => GetEventObject("ITEM").AsItem();
-        public int NumSplitOff => GetEventInt("NUMBER_SPLIT_OFF");
+        public int Amount => GetEventInt("NUMBER_SPLIT_OFF");
 
         public ItemSplitEvent(string script) { EventType = script; }
 

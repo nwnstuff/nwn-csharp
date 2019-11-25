@@ -59,12 +59,12 @@ namespace NWN
                 return EventNamesShortLong.Where(p=>p.Value==script).First().Key;
             if (script.Length <= MAX_CHARS_IN_SCRIPT_NAME) 
                 return script;
-            if (!script.StartsWith("NWNX_ON_")) 
+            var prefix = "NWNX_";
+            if (!script.StartsWith(prefix)) 
                 return script.Substring(0, MAX_CHARS_IN_SCRIPT_NAME);
 
-            var prefix = "NWNX_ON_";
             var suffix = script.Substring(script.LastIndexOf('_') + 1);
-            var name = script.Substring(prefix.Length, script.Length-suffix.Length-prefix.Length);
+            var name = script.Substring(prefix.Length, script.Length-suffix.Length-prefix.Length-1);
             if (name.Length > MAX_CHARS_IN_SCRIPT_NAME - 5)
                 name = name.Substring(0, MAX_CHARS_IN_SCRIPT_NAME-10) + $"-{numFakeNames++}";
             return $"nx-{name.Replace('_', '-')}-{suffix.Substring(0, 1)}".ToLower();

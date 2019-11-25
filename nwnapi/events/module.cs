@@ -97,6 +97,7 @@ namespace NWN.Events
 
             Console.WriteLine("Module loaded. Configuring events.");
             NWNEventHandler.SubscribeToNWNXEvents();
+            EventLogger.HookAllMessages();
             var module = NWModule.Module;
             module.Scripts[EventScript.Module_OnClientEnter]            = "mod-client-enter";
             module.Scripts[EventScript.Module_OnClientExit]             = "mod-client-exit";
